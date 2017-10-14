@@ -37,53 +37,67 @@ Vcar = zeros(5, 1);
 Av = zeros(5, 31);
 Bv3 = zeros(5, 31);
 
-for i = 1:5
-    A(i) = m*g*(f0*cos(alpha(i)*pi) + sin(alpha(i)));
-    B(i) = m*g*K*cos(alpha(i)) + 0.5*ro*S*Cx;
-
-    Vcar(i) = sqrt(A(1)/B(1));
-    Pcar(i) = 2*A(i)*sqrt(A(i)/B(i));
-        
-    for j = 1:31
-        R(i, j) = A(i) + B(i)*(vm(j).^2);
-        Av(i, j) = A(i)*vm(j);
-        Bv3(i, j) = B(i)*vm(j).^3;
-        P(i, j) = Av(i, j) + Bv3(i, j);
-        Pnorm(i, j) = P(i, j)/Pcar(i);
-    end
-
-    Vnorm = vm/Vcar(i);
-    
-end
-
-figure; hold on;
-
-for i = 1:2
-    subplot(2, 2, i);
-    plot(vm, R(i, 1:31), 'g');
-    xlabel('Velocity (m/s)');
-    ylabel('Resistance (N)');
-    title(['Resistance vs Velocity @ tan(alpha) = ', num2str(tan(alpha(i)))]);
-end
-
-for i = 1:2
-    subplot(2, 2, i+2);
-    plot(log(vm), log(P(i, 1:31)), log(vm), log(Av(i, 1:31)), log(vm), log(Bv3(i, 1:31)));
-    xlabel('log(V)');
-    ylabel('log(P)');
-    title(['Power vs Velocity @ tan(alpha) = ', num2str(tan(alpha(i)))]);
-end
-
-figure; hold on;
-
-for i = 1:5
-    subplot(2, 3, i);
-    plot(log(Vnorm), log(Pnorm(i, 1:31)));
-    xlabel('log(Vnorm)');
-    ylabel('log(Pnorm)');
-    title(['Pnorm vs Vnorm @ tan(alpha) = ', num2str(tan(alpha(i)))]);
-end
+% for i = 1:5
+%     A(i) = m*g*(f0*cos(alpha(i)*pi) + sin(alpha(i)));
+%     B(i) = m*g*K*cos(alpha(i)) + 0.5*ro*S*Cx;
+% 
+%     Vcar(i) = sqrt(A(1)/B(1));
+%     Pcar(i) = 2*A(i)*sqrt(A(i)/B(i));
+%         
+%     for j = 1:31
+%         R(i, j) = A(i) + B(i)*(vm(j).^2);
+%         Av(i, j) = A(i)*vm(j);
+%         Bv3(i, j) = B(i)*vm(j).^3;
+%         P(i, j) = Av(i, j) + Bv3(i, j);
+%         Pnorm(i, j) = P(i, j)/Pcar(i);
+%     end
+% 
+%     Vnorm = vm/Vcar(i);
+%     
+% end
+% 
+% figure; hold on;
+% 
+% for i = 1:2
+%     subplot(2, 2, i);
+%     plot(vm, R(i, 1:31), 'g');
+%     xlabel('Velocity (m/s)');
+%     ylabel('Resistance (N)');
+%     title(['Resistance vs Velocity @ tan(alpha) = ', num2str(tan(alpha(i)))]);
+% end
+% 
+% for i = 1:2
+%     subplot(2, 2, i+2);
+%     plot(log(vm), log(P(i, 1:31)), log(vm), log(Av(i, 1:31)), log(vm), log(Bv3(i, 1:31)));
+%     xlabel('log(V)');
+%     ylabel('log(P)');
+%     title(['Power vs Velocity @ tan(alpha) = ', num2str(tan(alpha(i)))]);
+% end
+% 
+% figure; hold on;
+% 
+% for i = 1:5
+%     subplot(2, 3, i);
+%     plot(log(Vnorm), log(Pnorm(i, 1:31)));
+%     xlabel('log(Vnorm)');
+%     ylabel('log(Pnorm)');
+%     title(['Pnorm vs Vnorm @ tan(alpha) = ', num2str(tan(alpha(i)))]);
+% end
 
 % Part 2
-we = [1000, 1500, 2000, 2500, 3000, 3250, 3500, 4000, 4500, 5000, 5500, 6000, 6500];
+werpm = [1000, 1500, 2000, 2500, 3000, 3250, 3500, 4000, 4500, 5000, 5500, 6000, 6500];
+we = (2*pi/60).*werpm;
 mep = [5.985, 8.5785, 8.841, 9.3345, 9.513, 9.6705, 9.6075, 9.6285, 9.4815, 8.9250, 8.2530, 7.791, 7.119];
+%Using a for stroke engine
+k = 0.5;
+Pe = zeros(13, 1);
+Me = zeros(13, 1);
+for i = 1:13
+   Pe(i) =  k*mep(i)*Vcil*we(i)/(2*pi);
+   Me(i) = Pe(i)/we(i);
+end
+figure; hold on;
+subplot(1, 2, 1);
+plot(we, Pe);
+subplot(1, 2, 2);
+plot(we, Me);

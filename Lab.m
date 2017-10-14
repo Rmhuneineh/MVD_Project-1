@@ -59,7 +59,7 @@ Bv3 = zeros(5, 31);
 % figure; hold on;
 % 
 % for i = 1:2
-%     subplot(2, 2, i);
+%     subplot(3, 3, i);
 %     plot(vm, R(i, 1:31), 'g');
 %     xlabel('Velocity (m/s)');
 %     ylabel('Resistance (N)');
@@ -67,17 +67,15 @@ Bv3 = zeros(5, 31);
 % end
 % 
 % for i = 1:2
-%     subplot(2, 2, i+2);
+%     subplot(3, 3, i+2);
 %     plot(log(vm), log(P(i, 1:31)), log(vm), log(Av(i, 1:31)), log(vm), log(Bv3(i, 1:31)));
 %     xlabel('log(V)');
 %     ylabel('log(P)');
 %     title(['Power vs Velocity @ tan(alpha) = ', num2str(tan(alpha(i)))]);
 % end
 % 
-% figure; hold on;
-% 
 % for i = 1:5
-%     subplot(2, 3, i);
+%     subplot(3, 3, i+4);
 %     plot(log(Vnorm), log(Pnorm(i, 1:31)));
 %     xlabel('log(Vnorm)');
 %     ylabel('log(Pnorm)');
@@ -97,7 +95,36 @@ for i = 1:13
    Me(i) = Pe(i)/we(i);
 end
 figure; hold on;
-subplot(1, 2, 1);
+subplot(2, 2, 1);
 plot(we, Pe);
-subplot(1, 2, 2);
+xlabel('We (rad/s)');
+ylabel('Pe (W)');
+title('Power vs RPM');
+subplot(2, 2, 2);
 plot(we, Me);
+xlabel('We (rad/s)');
+ylabel('Me (Nm)');
+title('Torque vs RPM');
+
+[Pmax, imax] = max(Pe);
+wemax = we(imax);
+Pi = zeros(3, 1);
+Peapp = zeros(13, 1);
+
+for i = 1:3
+    Pi(i) = Pmax/(wemax^i);
+end
+
+Pi(3) = -Pi(3);
+
+for i= 1:13
+    for j = 1:3
+       Peapp(i) = Peapp(i) + Pi(j)*we(i)^j; 
+    end
+end
+
+subplot(2, 2, 3);
+plot(we, Peapp);
+xlabel('We (rad/s)');
+ylabel('Pe (W)');
+title('Approximated Power vs RPM');

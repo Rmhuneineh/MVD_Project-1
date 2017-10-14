@@ -128,3 +128,13 @@ plot(we, Peapp);
 xlabel('We (rad/s)');
 ylabel('Pe (W)');
 title('Approximated Power vs RPM');
+
+Pa = zeros(13, 1);
+for i = 1:13
+   Pa(i) = efficiencyt.*Pe(i); 
+end
+subplot(2, 2, 4);
+plot(we, Pa);
+xlabel('We (rad/s)');
+ylabel('Pa (W)');
+title('Power Available at the Wheels vs RPM');

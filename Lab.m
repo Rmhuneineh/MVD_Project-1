@@ -87,13 +87,13 @@ end
 werpm = [1000, 1500, 2000, 2500, 3000, 3250, 3500, 4000, 4500, 5000, 5500, 6000, 6500]; %[rpm]
 we = (2*pi/60).*werpm; %[rad/s]
 mep = [5.985, 8.5785, 8.841, 9.3345, 9.513, 9.6705, 9.6075, 9.6285, 9.4815, 8.9250, 8.2530, 7.791, 7.119]; %[bar]
-%Using a for stroke engine
+%Using a four stroke engine
 k = 0.5;
 Pe = zeros(13, 1);
 Me = zeros(13, 1);
 for i = 1:13
-   Pe(i) =  k*mep(i)*Vcil*we(i)/(2*pi); % not sure
-   Me(i) = Pe(i)/(we(i)); % not sure
+   Pe(i) =  k*mep(i)*Vcil*we(i)/(2*pi)*10^-1; % [W]
+   Me(i) = Pe(i)/(we(i)); % [Nm]
 end
 figure; hold on;
 subplot(2, 2, 1);
@@ -107,63 +107,64 @@ xlabel('We (rpm)');
 ylabel('Me (Nm)');
 title('Torque vs RPM');
 
-[Pmax, imax] = max(Pe); % not sure
-wemax = werpm(imax); % [rpm]
+[Pmax, imax] = max(Pe); % [W]
+wemax = we(imax); % [rad/s]
 Pi = zeros(3, 1);
 Peapp = zeros(13, 1);
 
 for i = 1:3
-    Pi(i) = Pmax/(wemax^i); % not sure
+    Pi(i) = Pmax/(wemax^i);
 end
 
 Pi(3) = -Pi(3);
 
 for i= 1:13
     for j = 1:3
-       Peapp(i) = Peapp(i) + Pi(j)*werpm(i)^j; % not sure
+       Peapp(i) = Peapp(i) + Pi(j)*we(i)^j; % [W]
     end
 end
 
 subplot(2, 2, 3);
-plot(we, Peapp);
+plot(werpm, Peapp);
 xlabel('We (rpm)');
 ylabel('Pe (W)');
 title('Approximated Power vs RPM');
 
 Pa = zeros(13, 1);
 for i = 1:13
-   Pa(i) = efficiencyt*Pe(i); % not sure
+   Pa(i) = efficiencyt*Pe(i); % [W]
 end
 subplot(2, 2, 4);
-plot(we, Pa);
+plot(werpm, Pa);
 xlabel('We (rpm)');
 ylabel('Pa (W)');
 title('Power Available at the Wheels vs RPM');
 
 % Part 3
-Astar = power(max(Pa)/2/B(1), 1/3); % not sure
-Bstar = sqrt(4*(A(1)^3)/27/max(Pa)/B(1)); % not sure
-Vmax = Astar*(power(Bstar+1, 1/3)-power(Bstar-1, 1/3)); % not sure
-Re = .98*R0; % [mm]
+Pamax = max(Pa);
+Astar = power(Pamax/(2*B(1)), 1/3); % not sure
+Bstar = sqrt((4*A(1)^3/(27*Pamax*B(1)))); % not sure
+Vmax = Astar*(power(Bstar+1, 1/3)-power(Bstar-1, 1/3)); % [m/s]
+Re = .98*R0*10^-3; % [m]
 alphamax = atan(.33); %[-]
-Tgtop = Vmax/(Tf*Re*wemax*2*pi/60); %[-]
+Tgtop = Vmax/(Tf*Re*wemax); %[-]
 Tgbottom = Me(1)*efficiencyt/(Tf*Re*m*g*(f0*cos(alphamax)+sin(alphamax))); %[-]
 Tgi = zeros(5, 1);
 Tgi(1) = Tgbottom;
 Tgi(5) = Tgtop;
-for i = 2:4
-   Tgi(i) = Tgi(i-1)*power((Tgtop/Tgbottom), 1/(N-1)); %[-] 
-end
-
-figure; hold on;
-Vw = zeros(5, 13);
-for i = 1:5
-   for j = 1:13
-       Vw(i, j) = we(j)*Tf*Tgi(i)*Re*10^-3; % [m/s]
-   end
-end
-
-for i = 1:5
-   subplot(2, 3, i); 
-   plot(Vw(i, 1:13), Pa(1:13, 1));
-end
+% for i = 2:4
+%    Tgi(i) = Tgi(i-1)*power((Tgtop/Tgbottom), 1/(N-1)); %[-] 
+% end
+% 
+% figure; hold on;
+% Vw = zeros(5, 13);
+% for i = 1:5
+%    for j = 1:13
+%        Vw(i, j) = we(j)*Tf*Tgi(i)*Re; % [m/s]
+%    end
+% end
+% 
+% for i = 1:5
+%    subplot(2, 3, i); 
+%    plot(Vw(i, 1:13), Pa(1:13, 1));
+% end

@@ -31,7 +31,7 @@ vm = (vKm./3.6); %[m/s]
 A = zeros(5, 1);
 B = zeros(5, 1);
 R = zeros(5, 31);
-P = zeros(5, 31);
+Pn = zeros(5, 31);
 Pnorm = zeros(5, 31);
 Pcar = zeros(5, 1);
 Vcar = zeros(5, 1);
@@ -39,21 +39,21 @@ Av = zeros(5, 31);
 Bv3 = zeros(5, 31);
 
 for i = 1:5
-    A(i) = m*g*(f0*cos(alpha(i)*pi) + sin(alpha(i))); %[N]
+    A(i) = m*g*(f0*cos(alpha(i)) + sin(alpha(i))); %[N]
     B(i) = m*g*K*cos(alpha(i)) + 0.5*ro*S*Cx; %[kg/m]
 
     Vcar(i) = sqrt(A(1)/B(1)); %[m/s]
     Pcar(i) = 2*A(i)*sqrt(A(i)/B(i)); %[W]
         
     for j = 1:31
-        R(i, j) = A(i) + B(i)*(vm(j).^2); %[N]
+        R(i, j) = A(i) + B(i)*(vm(j)^2); %[N]
         Av(i, j) = A(i)*vm(j); %[W]
-        Bv3(i, j) = B(i)*vm(j).^3; %[W]
-        P(i, j) = (Av(i, j) + Bv3(i, j)); %[W]
-        Pnorm(i, j) = P(i, j)/Pcar(i); %[-]
+        Bv3(i, j) = B(i)*vm(j)^3; %[W]
+        Pn(i, j) = Av(i, j) + Bv3(i, j); %[W]
+        Pnorm(i, j) = Pn(i, j)/Pcar(i); %[-]
     end
 
-    Vnorm = vm*10^-3/Vcar(i); %[-]
+    Vnorm = vm/Vcar(i); %[-]
     
 end
 
@@ -69,15 +69,17 @@ end
 
 for i = 1:2
     subplot(3, 3, i+2);
-    plot(log(vKm), log(P(i, 1:31)), log(vKm), log(Av(i, 1:31)), log(vKm), log(Bv3(i, 1:31)));
+    loglog(vKm, Pn(i, 1:31)); hold on;
+    loglog(vKm, Av(i, 1:31));
+    loglog(vKm, Bv3(i, 1:31));
     xlabel('log(V)');
-    ylabel('log(P)');
+    ylabel('log(Pn)');
     title(['Power vs Velocity @ tan(alpha) = ', num2str(tan(alpha(i)))]);
 end
 
 for i = 1:5
     subplot(3, 3, i+4);
-    plot(log(Vnorm), log(Pnorm(i, 1:31)));
+    loglog(Vnorm, Pnorm(i, 1:31));
     xlabel('log(Vnorm)');
     ylabel('log(Pnorm)');
     title(['Pnorm vs Vnorm @ tan(alpha) = ', num2str(tan(alpha(i)))]);
@@ -92,8 +94,8 @@ k = 0.5;
 Pe = zeros(13, 1);
 Me = zeros(13, 1);
 for i = 1:13
-   Pe(i) =  k*mep(i)*Vcil*we(i)/(2*pi)*10^-1; % [W]
-   Me(i) = Pe(i)/(we(i)); % [Nm]
+   Pe(i) =  .1*k*mep(i)*Vcil*we(i)/(2*pi); % [W]
+   Me(i) = Pe(i)/we(i); % [Nm]
 end
 figure; hold on;
 subplot(2, 2, 1);
@@ -143,7 +145,7 @@ title('Power Available at the Wheels vs RPM');
 % Part 3
 Pamax = max(Pa);
 Astar = power(Pamax/(2*B(1)), 1/3); % not sure
-Bstar = sqrt((4*A(1)^3/(27*Pamax*B(1)))); % not sure
+Bstar = sqrt(1+(4*A(1)^3/(27*(Pamax^2)*B(1)))); % not sure
 Vmax = Astar*(power(Bstar+1, 1/3)-power(Bstar-1, 1/3)); % [m/s]
 Re = .98*R0*10^-3; % [m]
 alphamax = atan(.33); %[-]
@@ -152,19 +154,14 @@ Tgbottom = Me(1)*efficiencyt/(Tf*Re*m*g*(f0*cos(alphamax)+sin(alphamax))); %[-]
 Tgi = zeros(5, 1);
 Tgi(1) = Tgbottom;
 Tgi(5) = Tgtop;
-% for i = 2:4
-%    Tgi(i) = Tgi(i-1)*power((Tgtop/Tgbottom), 1/(N-1)); %[-] 
-% end
-% 
-% figure; hold on;
-% Vw = zeros(5, 13);
-% for i = 1:5
-%    for j = 1:13
-%        Vw(i, j) = we(j)*Tf*Tgi(i)*Re; % [m/s]
-%    end
-% end
-% 
-% for i = 1:5
-%    subplot(2, 3, i); 
-%    plot(Vw(i, 1:13), Pa(1:13, 1));
-% end
+for i = 2:4
+   Tgi(i) = Tgi(i-1)*power((Tgtop/Tgbottom), 1/(N-1)); %[-] 
+end
+
+figure; hold on;
+Vw = zeros(5, 13);
+for i = 1:5
+   for j = 1:13
+       Vw(i, j) = we(j)*Tf*Tgi(i)*Re; % [m/s]
+   end
+end

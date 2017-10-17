@@ -69,9 +69,10 @@ figure; hold on;
 for i = 1:2
     subplot(3, 3, i);
     plot(vKm, R(i, 1:31), 'g');
-    xlabel('Velocity (km/h)');
-    ylabel('Resistance (N)');
+    xlabel('Velocity [km/h]');
+    ylabel('Resistance [N]');
     title(['Resistance vs Velocity @ tan(alpha) = ', num2str(tan(alpha(i)))]);
+    grid on;
 end
 
 for i = 1:2
@@ -82,6 +83,7 @@ for i = 1:2
     xlabel('log(V)');
     ylabel('log(Pn)');
     title(['Power vs Velocity @ tan(alpha) = ', num2str(tan(alpha(i)))]);
+    grid on;
 end
 
 for i = 1:5
@@ -90,6 +92,7 @@ for i = 1:5
     xlabel('log(Vnorm)');
     ylabel('log(Pnorm)');
     title(['Pnorm vs Vnorm @ tan(alpha) = ', num2str(tan(alpha(i)))]);
+    grid on;
 end
 
 % Part 2
@@ -100,7 +103,7 @@ we = (2*pi/60).*werpm; %[rad/s]
 mep = [5.985, 8.5785, 8.841, 9.3345, 9.513, 9.6705, 9.6075, 9.6285, 9.4815, 8.9250, 8.2530, 7.791, 7.119]; %[bar]
 
 % Using a four stroke engine
-k = 0.5;
+k = .5;
 
 % Declare Pe And Me Vectors As Zeros
 Pe = zeros(13, 1);
@@ -116,14 +119,16 @@ end
 figure; hold on;
 subplot(2, 2, 1);
 plot(werpm, Pe);
-xlabel('We (rpm)');
-ylabel('Pe (W)');
+xlabel('We [rpm]');
+ylabel('Pe [W]');
 title('Power vs RPM');
+grid on;
 subplot(2, 2, 2);
 plot(werpm, Me);
-xlabel('We (rpm)');
-ylabel('Me (Nm)');
+xlabel('We [rpm]');
+ylabel('Me [Nm]');
 title('Torque vs RPM');
+grid on;
 
 % Obtain Maximum Power And Corresponding We
 [Pmax, imax] = max(Pe); % [W]
@@ -149,22 +154,26 @@ end
 % Plot The Graph Of The Approximated Value
 subplot(2, 2, 3);
 plot(werpm, Peapp);
-xlabel('We (rpm)');
-ylabel('Pe (W)');
+xlabel('We [rpm]');
+ylabel('Pe [W]');
 title('Approximated Power vs RPM');
+grid on;
 
 % Calculate The Power Available At The Wheels
 Pa = zeros(13, 1);
+Paapp = zeros(13, 1);
 for i = 1:13
    Pa(i) = efficiencyt*Pe(i); % [W]
+   Paapp(i) = efficiencyt*Peapp(i); % [W]
 end
 
 % Plot The Graph Of Power Available At The Wheels
 subplot(2, 2, 4);
 plot(werpm, Pa);
-xlabel('We (rpm)');
-ylabel('Pa (W)');
+xlabel('We [rpm]');
+ylabel('Pa [W]');
 title('Power Available at the Wheels vs RPM');
+grid on;
 
 % Part 3
 
@@ -176,7 +185,7 @@ Vmax = Astar*(power(Bstar+1, 1/3)-power(Bstar-1, 1/3)); % [m/s]
 
 % Calculate Gear Ratios
 Tgtop = Vmax/(Tf*Re*wemax); %[-]
-alphamax = atan(.33); %[-]
+alphamax = atan(.23); %[-]
 Tgbottom = Me(1)*efficiencyt/(Tf*Re*m*g*(f0*cos(alphamax)+sin(alphamax))); %[-]
 Tgi = zeros(5, 1);
 Tgi(1) = Tgbottom;
@@ -192,3 +201,42 @@ for i = 1:5
        Vw(i, j) = we(j)*Tf*Tgi(i)*Re; % [m/s]
    end
 end
+
+Avw = zeros(5, 13, 2);
+Bvw3 = zeros(5, 13, 2);
+
+for i = 1:5
+    for j = 1:13
+        Avw(i, j, 1) = A(1)*Vw(i, j);
+        Bvw3(i, j, 1) = B(1)*Vw(i, j)^3;
+    end
+end
+
+Aw = m*g*(f0*cos(alphamax) + sin(alphamax)); %[N]
+Bw = m*g*K*cos(alphamax); %[kg/m]
+
+for i = 1:5
+    for j = 1:13
+        Avw(i, j, 2) = Aw*Vw(i, j);
+        Bvw3(i, j, 2) = Bw*Vw(i, j)^3;
+    end
+end
+
+Pnw = zeros(5, 13, 2);
+for i = 1:2
+   for j = 1:5
+       for k = 1:13
+            Pnw(j, k, i) = Avw(j, k, i) + Bvw3(j, k, i); 
+       end
+   end
+end
+
+figure;  hold on;
+for i = 1:5
+    plot(Vw(i, 1:13), Pa, Vw(i, 1:13), Pnw(i, 1:13, 1), Vw(i, 1:13), Pnw(i, 1:13, 2));
+end
+xlabel('V [m/s]');
+ylabel('Pa | Pn [W]');
+title('Power Available & Power Needed (null and max slope) @ Different Gear Ratios');
+
+grid on;

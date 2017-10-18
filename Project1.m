@@ -25,11 +25,11 @@ alpha = atan(0:0.1:0.4); %[-]
 f0 = .013; %[-]
 K = 6.51*10^-6; %[s^2/m^2] 
 
+% POWER NEEDED FOR MOTION
+
 % Take Artbitrary Velocity Interval
 vKm = 0:10:300; %[km/h]
 vm = (vKm./3.6); %[m/s]
-
-% Part 1
 
 % Declare All Vectors/Matrices As Zeros
 A = zeros(5, 1);
@@ -95,7 +95,7 @@ for i = 1:5
     grid on;
 end
 
-% Part 2
+% COMPUTATION OF THE MAXIMUM POWER AVAILABLE AT THE WHEELS
 
 % Define RPM and MEP As Given In Engine Map
 werpm = [1000, 1500, 2000, 2500, 3000, 3250, 3500, 4000, 4500, 5000, 5500, 6000, 6500]; %[rpm]
@@ -175,7 +175,7 @@ ylabel('Pa [W]');
 title('Power Available at the Wheels vs RPM');
 grid on;
 
-% Part 3
+% GRADEABILITY AND INITIAL CHOICE OF THE TRANSMISSION RATIOS
 
 % Calculate Maximum Speed Vehicle Can Reach
 Pamax = max(Pa);

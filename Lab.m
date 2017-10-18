@@ -185,7 +185,7 @@ Vmax = Astar*(power(Bstar+1, 1/3)-power(Bstar-1, 1/3)); % [m/s]
 
 % Calculate Gear Ratios
 Tgtop = Vmax/(Tf*Re*wemax); %[-]
-alphamax = atan(.23); %[-]
+alphamax = atan(.33); %[-]
 Tgbottom = Me(1)*efficiencyt/(Tf*Re*m*g*(f0*cos(alphamax)+sin(alphamax))); %[-]
 Tgi = zeros(5, 1);
 Tgi(1) = Tgbottom;
@@ -213,7 +213,7 @@ for i = 1:5
 end
 
 Aw = m*g*(f0*cos(alphamax) + sin(alphamax)); %[N]
-Bw = m*g*K*cos(alphamax); %[kg/m]
+Bw = m*g*K*cos(alphamax) + .5*ro*S*Cx; %[kg/m]
 
 for i = 1:5
     for j = 1:13

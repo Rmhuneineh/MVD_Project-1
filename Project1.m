@@ -240,3 +240,57 @@ ylabel('Pa | Pn [W]');
 title('Power Available & Power Needed (null and max slope) @ Different Gear Ratios');
 
 grid on;
+
+% % MAXIMUM POWER THAT CAN BE TRANSFERRED BY THE TIRES TO THE GROUND
+
+% Define Constants
+c1 = [1.1, .8];
+c2 = [6, 8]*10^-3;
+
+% Calculate Dx
+Rl = 0.92*R0*10^-3;
+Dx = Rl.*(f0+K.*vm.^2);
+
+% Calculate Fz1 and Fz2
+K1 = ro*S*Cx*hG/2/m/g;
+K2 = -K1;
+Fz1 = m*g*(b-Dx-K1.*vm.^2)/l;
+Fz2 = m*g*(a+Dx-K2.*vm.^2)/l;
+
+% Calculate Maximum Power Transferred in Dry/Wet Conditions
+uip(1,1:31) = c1(1) - c2(1).*vm;
+uip(2,1:31) = c1(2) - c2(2).*vm;
+PmaxWG(1,1:31) = (Fz1).*uip(1,1:31).*vm;
+PmaxWG(2,1:31) = (Fz1).*uip(2,1:31).*vm;
+
+% Plot Required Graphs
+figure;
+plot(vm, PmaxWG(1, 1:31), vm, PmaxWG(2, 1:31), vm, Pn(1, 1:31));
+
+% Obtain The Maximum Velocity
+interD = InterX([vm;PmaxWG(1, 1:31)],[vm;Pn]);
+interW = InterX([vm;PmaxWG(2, 1:31)],[vm;Pn]);
+Vmax(1,1) = interD(1,2);
+Vmax(1,2) = interW(1,2);
+
+% % ACCELERATION PERFORMANCE
+
+% Compute Equivalent Mass
+me = m + Jw/Re^2 + Jt/(Re*Tf)^2 + Je/(Re*Tf)^2./Tgi.^2;
+
+% Compute Maximum Acceleration
+amax = zeros(5, 13);
+for i = 1:5
+   for j = 1:13
+      amax(i, j) = (Pa(j)-Pn(1,j))/(me(i)*Vw(i,j));
+   end
+end
+
+figure; hold on;
+
+for i = 1:5
+   plot(Vw(i, 1:13), amax(i, 1:13));
+end
+grid on;
+
+oneOamax = 1./amax;

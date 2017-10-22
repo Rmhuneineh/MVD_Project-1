@@ -66,36 +66,36 @@ for i = 1:5
 end
 
 % Plot The Required Graphs In Part I
-figure; hold on;
-
-for i = 1:2
-    subplot(3, 3, i);
-    plot(vKm, R(i, 1:31), 'g');
-    xlabel('Velocity [km/h]');
-    ylabel('Resistance [N]');
-    title(['Resistance vs Velocity @ tan(alpha) = ', num2str(tan(alpha(i)))]);
-    grid on;
-end
-
-for i = 1:2
-    subplot(3, 3, i+2);
-    loglog(vKm, Pn(i, 1:31)); hold on;
-    loglog(vKm, Av(i, 1:31));
-    loglog(vKm, Bv3(i, 1:31));
-    xlabel('log(V)');
-    ylabel('log(Pn)');
-    title(['Power vs Velocity @ tan(alpha) = ', num2str(tan(alpha(i)))]);
-    grid on;
-end
-
-for i = 1:5
-    subplot(3, 3, i+4);
-    loglog(Vnorm, Pnorm(i, 1:31));
-    xlabel('log(Vnorm)');
-    ylabel('log(Pnorm)');
-    title(['Pnorm vs Vnorm @ tan(alpha) = ', num2str(tan(alpha(i)))]);
-    grid on;
-end
+% % figure; hold on;
+% 
+% for i = 1:2
+%     subplot(3, 3, i);
+%     plot(vKm, R(i, 1:31), 'g');
+%     xlabel('Velocity [km/h]');
+%     ylabel('Resistance [N]');
+%     title(['Resistance vs Velocity @ tan(alpha) = ', num2str(tan(alpha(i)))]);
+%     grid on;
+% end
+% 
+% for i = 1:2
+%     subplot(3, 3, i+2);
+%     loglog(vKm, Pn(i, 1:31)); hold on;
+%     loglog(vKm, Av(i, 1:31));
+%     loglog(vKm, Bv3(i, 1:31));
+%     xlabel('log(V)');
+%     ylabel('log(Pn)');
+%     title(['Power vs Velocity @ tan(alpha) = ', num2str(tan(alpha(i)))]);
+%     grid on;
+% end
+% 
+% for i = 1:5
+%     subplot(3, 3, i+4);
+%     loglog(Vnorm, Pnorm(i, 1:31));
+%     xlabel('log(Vnorm)');
+%     ylabel('log(Pnorm)');
+%     title(['Pnorm vs Vnorm @ tan(alpha) = ', num2str(tan(alpha(i)))]);
+%     grid on;
+% end
 
 % COMPUTATION OF THE MAXIMUM POWER AVAILABLE AT THE WHEELS
 
@@ -118,19 +118,19 @@ for i = 1:13
 end
 
 % Plot The Required Graphs In Part II
-figure; hold on;
-subplot(2, 2, 1);
-plot(werpm, Pe);
-xlabel('We [rpm]');
-ylabel('Pe [W]');
-title('Power vs RPM');
-grid on;
-subplot(2, 2, 2);
-plot(werpm, Me);
-xlabel('We [rpm]');
-ylabel('Me [Nm]');
-title('Torque vs RPM');
-grid on;
+% figure; hold on;
+% subplot(2, 2, 1);
+% plot(werpm, Pe);
+% xlabel('We [rpm]');
+% ylabel('Pe [W]');
+% title('Power vs RPM');
+% grid on;
+% subplot(2, 2, 2);
+% plot(werpm, Me);
+% xlabel('We [rpm]');
+% ylabel('Me [Nm]');
+% title('Torque vs RPM');
+% grid on;
 
 % Obtain Maximum Power And Corresponding We
 [Pmax, imax] = max(Pe); % [W]
@@ -154,12 +154,12 @@ for i= 1:13
 end
 
 % Plot The Graph Of The Approximated Value
-subplot(2, 2, 3);
-plot(werpm, Peapp);
-xlabel('We [rpm]');
-ylabel('Pe [W]');
-title('Approximated Power vs RPM');
-grid on;
+% subplot(2, 2, 3);
+% plot(werpm, Peapp);
+% xlabel('We [rpm]');
+% ylabel('Pe [W]');
+% title('Approximated Power vs RPM');
+% grid on;
 
 % Calculate The Power Available At The Wheels
 Pa = zeros(13, 1);
@@ -170,12 +170,12 @@ for i = 1:13
 end
 
 % Plot The Graph Of Power Available At The Wheels
-subplot(2, 2, 4);
-plot(werpm, Pa);
-xlabel('We [rpm]');
-ylabel('Pa [W]');
-title('Power Available at the Wheels vs RPM');
-grid on;
+% subplot(2, 2, 4);
+% plot(werpm, Pa);
+% xlabel('We [rpm]');
+% ylabel('Pa [W]');
+% title('Power Available at the Wheels vs RPM');
+% grid on;
 
 % GRADEABILITY AND INITIAL CHOICE OF THE TRANSMISSION RATIOS
 
@@ -233,15 +233,15 @@ for i = 1:2
    end
 end
 
-figure;  hold on;
-for i = 1:5
-    plot(Vw(i, 1:13), Pa, Vw(i, 1:13), Pnw(i, 1:13, 1), Vw(i, 1:13), Pnw(i, 1:13, 2));
-end
-xlabel('V [m/s]');
-ylabel('Pa | Pn [W]');
-title('Power Available & Power Needed (null and max slope) @ Different Gear Ratios');
-
-grid on;
+% figure;  hold on;
+% for i = 1:5
+%     plot(Vw(i, 1:13), Pa, Vw(i, 1:13), Pnw(i, 1:13, 1), Vw(i, 1:13), Pnw(i, 1:13, 2));
+% end
+% xlabel('V [m/s]');
+% ylabel('Pa | Pn [W]');
+% title('Power Available & Power Needed (null and max slope) @ Different Gear Ratios');
+% 
+% grid on;
 
 % % MAXIMUM POWER THAT CAN BE TRANSFERRED BY THE TIRES TO THE GROUND
 
@@ -266,8 +266,8 @@ PmaxWG(1,1:31) = (Fz1).*uip(1,1:31).*vm;
 PmaxWG(2,1:31) = (Fz1).*uip(2,1:31).*vm;
 
 % Plot Required Graphs
-figure;
-plot(vm, PmaxWG(1, 1:31), vm, PmaxWG(2, 1:31), vm, Pn(1, 1:31));
+% figure;
+% plot(vm, PmaxWG(1, 1:31), vm, PmaxWG(2, 1:31), vm, Pn(1, 1:31));
 
 % Obtain The Maximum Velocity
 interD = InterX([vm;PmaxWG(1, 1:31)],[vm;Pn]);
@@ -275,7 +275,7 @@ interW = InterX([vm;PmaxWG(2, 1:31)],[vm;Pn]);
 Vmax(1,1) = interD(1,2);
 Vmax(1,2) = interW(1,2);
 
-% % ACCELERATION PERFORMANCE
+% ACCELERATION PERFORMANCE
 
 % Compute Equivalent Mass
 me = m + Jw/Re^2 + Jt/(Re*Tf)^2 + Je/(Re*Tf)^2./Tgi.^2;
@@ -284,15 +284,61 @@ me = m + Jw/Re^2 + Jt/(Re*Tf)^2 + Je/(Re*Tf)^2./Tgi.^2;
 amax = zeros(5, 13);
 for i = 1:5
    for j = 1:13
-      amax(i, j) = (Pa(j)-Pn(1,j))/(me(i)*Vw(i,j));
+      amax(i, j) = (Pa(j)-Pnw(1,j))/(me(i)*Vw(i,j));
    end
 end
 
+% Plot Maximum Acceleration
+oneOamax = 1./amax;
 figure; hold on;
 
 for i = 1:5
-   plot(Vw(i, 1:13), amax(i, 1:13));
+   plot(Vw(i, 1:13), oneOamax(i, 1:13));
 end
 grid on;
 
-oneOamax = 1./amax;
+% Find Points of Intersections
+x = [Vw(2,13) Vw(3,13), 100/3.6];
+y = [0 4];
+F0 = [Vw(1,1);oneOamax(1,1)];
+F1 = InterX([Vw(1,1:13);oneOamax(1,1:13)],[Vw(2,1:13);oneOamax(2,1:13)]);
+F2 = InterX([Vw(3,1:13);oneOamax(3,1:13)],[[x(1) x(1)];[y(1) y(2)]]);
+F3 = InterX([Vw(4,1:13);oneOamax(4,1:13)],[[x(2) x(2)];[y(1) y(2)]]);
+F4 = InterX([Vw(5,1:13);oneOamax(5,1:13)],[[x(3) x(3)];[y(1) y(2)]]);
+
+% Find Increments for Different Intervals
+I = [F1(1)-F0(1), F2(1)-F1(1), F3(1)-F2(1), F4(1)-F3(1)]/10;
+
+% Calculate New Velocity Vector
+newV = zeros(1, 40);
+base = Vw(1,1);
+for i = 1:4
+   for j = (10*i-9):10*i
+      newV(j) =  base + I(i)*(j-10*(i-1));
+   end
+   base = newV(j);
+end
+
+% Calculate New 1/Acceleration Vector
+newA = zeros(1, 40);
+for i = 1:4
+    for j = (10*i-9):10*i
+        if (j==10*i && i~=1)
+            POINT = InterX([Vw(i+1,1:13);oneOamax(i+1,1:13)],[[newV(j) newV(j)];[y(1) y(2)]]);
+        else
+            POINT = InterX([Vw(i,1:13);oneOamax(i,1:13)],[[newV(j) newV(j)];[y(1) y(2)]]);
+        end
+        newA(j) = POINT(2);
+    end
+end
+
+% Calculate Time Using Numerical Integration
+Time = zeros(1, 40);
+Time(2) = trapz([Vw(1,1) newV(1)],[oneOamax(1,1), newA(1)]);
+for i = 3:40
+    Time(i) = Time(i-1) + trapz([newV(i-2) newV(i-1)],[newA(i-2) newA(i-1)]);
+end
+
+% Plot Graph of V vs T
+figure; hold on;
+plot(Time, newV);

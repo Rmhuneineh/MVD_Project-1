@@ -342,3 +342,6 @@ end
 % Plot Graph of V vs T
 figure; hold on;
 plot(Time, newV);
+title('Velocity vs Time');
+xlabel('Time [s]');
+ylabel('Velocity [m/s]');

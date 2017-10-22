@@ -66,36 +66,36 @@ for i = 1:5
 end
 
 % Plot The Required Graphs In Part I
-% % figure; hold on;
-% 
-% for i = 1:2
-%     subplot(3, 3, i);
-%     plot(vKm, R(i, 1:31), 'g');
-%     xlabel('Velocity [km/h]');
-%     ylabel('Resistance [N]');
-%     title(['Resistance vs Velocity @ tan(alpha) = ', num2str(tan(alpha(i)))]);
-%     grid on;
-% end
-% 
-% for i = 1:2
-%     subplot(3, 3, i+2);
-%     loglog(vKm, Pn(i, 1:31)); hold on;
-%     loglog(vKm, Av(i, 1:31));
-%     loglog(vKm, Bv3(i, 1:31));
-%     xlabel('log(V)');
-%     ylabel('log(Pn)');
-%     title(['Power vs Velocity @ tan(alpha) = ', num2str(tan(alpha(i)))]);
-%     grid on;
-% end
-% 
-% for i = 1:5
-%     subplot(3, 3, i+4);
-%     loglog(Vnorm, Pnorm(i, 1:31));
-%     xlabel('log(Vnorm)');
-%     ylabel('log(Pnorm)');
-%     title(['Pnorm vs Vnorm @ tan(alpha) = ', num2str(tan(alpha(i)))]);
-%     grid on;
-% end
+% figure; hold on;
+
+for i = 1:2
+    subplot(3, 3, i);
+    plot(vKm, R(i, 1:31), 'g');
+    xlabel('Velocity [km/h]');
+    ylabel('Resistance [N]');
+    title(['Resistance vs Velocity @ tan(alpha) = ', num2str(tan(alpha(i)))]);
+    grid on;
+end
+
+for i = 1:2
+    subplot(3, 3, i+2);
+    loglog(vKm, Pn(i, 1:31)); hold on;
+    loglog(vKm, Av(i, 1:31));
+    loglog(vKm, Bv3(i, 1:31));
+    xlabel('log(V)');
+    ylabel('log(Pn)');
+    title(['Power vs Velocity @ tan(alpha) = ', num2str(tan(alpha(i)))]);
+    grid on;
+end
+
+for i = 1:5
+    subplot(3, 3, i+4);
+    loglog(Vnorm, Pnorm(i, 1:31));
+    xlabel('log(Vnorm)');
+    ylabel('log(Pnorm)');
+    title(['Pnorm vs Vnorm @ tan(alpha) = ', num2str(tan(alpha(i)))]);
+    grid on;
+end
 
 % COMPUTATION OF THE MAXIMUM POWER AVAILABLE AT THE WHEELS
 
@@ -118,19 +118,19 @@ for i = 1:13
 end
 
 % Plot The Required Graphs In Part II
-% figure; hold on;
-% subplot(2, 2, 1);
-% plot(werpm, Pe);
-% xlabel('We [rpm]');
-% ylabel('Pe [W]');
-% title('Power vs RPM');
-% grid on;
-% subplot(2, 2, 2);
-% plot(werpm, Me);
-% xlabel('We [rpm]');
-% ylabel('Me [Nm]');
-% title('Torque vs RPM');
-% grid on;
+figure; hold on;
+subplot(2, 2, 1);
+plot(werpm, Pe);
+xlabel('We [rpm]');
+ylabel('Pe [W]');
+title('Power vs RPM');
+grid on;
+subplot(2, 2, 2);
+plot(werpm, Me);
+xlabel('We [rpm]');
+ylabel('Me [Nm]');
+title('Torque vs RPM');
+grid on;
 
 % Obtain Maximum Power And Corresponding We
 [Pmax, imax] = max(Pe); % [W]
@@ -154,12 +154,12 @@ for i= 1:13
 end
 
 % Plot The Graph Of The Approximated Value
-% subplot(2, 2, 3);
-% plot(werpm, Peapp);
-% xlabel('We [rpm]');
-% ylabel('Pe [W]');
-% title('Approximated Power vs RPM');
-% grid on;
+subplot(2, 2, 3);
+plot(werpm, Peapp);
+xlabel('We [rpm]');
+ylabel('Pe [W]');
+title('Approximated Power vs RPM');
+grid on;
 
 % Calculate The Power Available At The Wheels
 Pa = zeros(13, 1);
@@ -170,12 +170,12 @@ for i = 1:13
 end
 
 % Plot The Graph Of Power Available At The Wheels
-% subplot(2, 2, 4);
-% plot(werpm, Pa);
-% xlabel('We [rpm]');
-% ylabel('Pa [W]');
-% title('Power Available at the Wheels vs RPM');
-% grid on;
+subplot(2, 2, 4);
+plot(werpm, Pa);
+xlabel('We [rpm]');
+ylabel('Pa [W]');
+title('Power Available at the Wheels vs RPM');
+grid on;
 
 % GRADEABILITY AND INITIAL CHOICE OF THE TRANSMISSION RATIOS
 
@@ -233,15 +233,15 @@ for i = 1:2
    end
 end
 
-% figure;  hold on;
-% for i = 1:5
-%     plot(Vw(i, 1:13), Pa, Vw(i, 1:13), Pnw(i, 1:13, 1), Vw(i, 1:13), Pnw(i, 1:13, 2));
-% end
-% xlabel('V [m/s]');
-% ylabel('Pa | Pn [W]');
-% title('Power Available & Power Needed (null and max slope) @ Different Gear Ratios');
-% 
-% grid on;
+figure;  hold on;
+for i = 1:5
+    plot(Vw(i, 1:13), Pa, Vw(i, 1:13), Pnw(i, 1:13, 1), Vw(i, 1:13), Pnw(i, 1:13, 2));
+end
+xlabel('V [m/s]');
+ylabel('Pa | Pn [W]');
+title('Power Available & Power Needed (null and max slope) @ Different Gear Ratios');
+
+grid on;
 
 % % MAXIMUM POWER THAT CAN BE TRANSFERRED BY THE TIRES TO THE GROUND
 
@@ -266,8 +266,8 @@ PmaxWG(1,1:31) = (Fz1).*uip(1,1:31).*vm;
 PmaxWG(2,1:31) = (Fz1).*uip(2,1:31).*vm;
 
 % Plot Required Graphs
-% figure;
-% plot(vm, PmaxWG(1, 1:31), vm, PmaxWG(2, 1:31), vm, Pn(1, 1:31));
+figure;
+plot(vm, PmaxWG(1, 1:31), vm, PmaxWG(2, 1:31), vm, Pn(1, 1:31));
 
 % Obtain The Maximum Velocity
 interD = InterX([vm;PmaxWG(1, 1:31)],[vm;Pn]);
@@ -293,7 +293,7 @@ oneOamax = 1./amax;
 figure; hold on;
 
 for i = 1:5
-   plot(Vw(i, 1:13), oneOamax(i, 1:13));
+   plot(Vw(i, 1:13), amax(i, 1:13));
 end
 grid on;
 

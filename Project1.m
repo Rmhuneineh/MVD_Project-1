@@ -272,13 +272,13 @@ plot(vm, PmaxWG(1, 1:31), vm, PmaxWG(2, 1:31), vm, Pn(1, 1:31));
 % Obtain The Maximum Velocity
 interD = InterX([vm;PmaxWG(1, 1:31)],[vm;Pn]);
 interW = InterX([vm;PmaxWG(2, 1:31)],[vm;Pn]);
-Vmax(1,1) = interD(1,2);
-Vmax(1,2) = interW(1,2);
+VmaxWG(1,1) = interD(1,2);
+VmaxWG(1,2) = interW(1,2);
 
 % ACCELERATION PERFORMANCE
 
 % Compute Equivalent Mass
-me = m + Jw/Re^2 + Jt/(Re*Tf)^2 + Je/(Re*Tf)^2./Tgi.^2;
+me = m + Jt/(Re*Tf)^2 + Je/(Re*Tf)^2./Tgi.^2;
 
 % Compute Maximum Acceleration
 amax = zeros(5, 13);

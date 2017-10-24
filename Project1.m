@@ -268,6 +268,9 @@ PmaxWG(2,1:31) = (Fz1).*uip(2,1:31).*vm;
 % Plot Required Graphs
 figure;
 plot(vm, PmaxWG(1, 1:31), vm, PmaxWG(2, 1:31), vm, Pn(1, 1:31));
+title('Maximum Power Transferred Between Wheel and Ground vs Velocity');
+xlabel('V [m/s]');
+ylabel('P [W]');
 
 % Obtain The Maximum Velocity
 interD = InterX([vm;PmaxWG(1, 1:31)],[vm;Pn]);
@@ -284,9 +287,15 @@ me = m + Jt/(Re*Tf)^2 + Je/(Re*Tf)^2./Tgi.^2;
 amax = zeros(5, 13);
 for i = 1:5
    for j = 1:13
-      amax(i, j) = (Pa(j)-Pnw(1,j))/(me(i)*Vw(i,j));
+      amax(i, j) = (Pa(j)-Pnw(i,j))/(me(i)*Vw(i,j));
    end
 end
+
+% In this case we realise that at 5th gear ratio the maximum velocity is
+% attained at the index = 12; therefore, theoratically we get a negative
+% acceleration which we must substitute by 0 since the acceleration goes to
+% 0 (in ideal case) when a body reached its maximum speed
+amax(5,13) = 0;
 
 % Plot Maximum Acceleration
 oneOamax = 1./amax;
@@ -295,16 +304,20 @@ figure; hold on;
 for i = 1:5
    plot(Vw(i, 1:13), amax(i, 1:13));
 end
+title('Maximum Acceleration vs Veloctiy');
+xlabel('V [m/s]');
+ylabel('A [m/s^2]');
 grid on;
 
 % Find Points of Intersections
-x = [Vw(2,13) Vw(3,13), 100/3.6];
+x = [Vw(1, 13) Vw(2,13) Vw(3,13), 100/3.6];
 y = [0 4];
 F0 = [Vw(1,1);oneOamax(1,1)];
 F1 = InterX([Vw(1,1:13);oneOamax(1,1:13)],[Vw(2,1:13);oneOamax(2,1:13)]);
-F2 = InterX([Vw(3,1:13);oneOamax(3,1:13)],[[x(1) x(1)];[y(1) y(2)]]);
-F3 = InterX([Vw(4,1:13);oneOamax(4,1:13)],[[x(2) x(2)];[y(1) y(2)]]);
-F4 = InterX([Vw(5,1:13);oneOamax(5,1:13)],[[x(3) x(3)];[y(1) y(2)]]);
+F2 = InterX([Vw(3,1:13);oneOamax(3,1:13)],[[x(2) x(2)];[y(1) y(2)]]);
+F3 = InterX([Vw(4,1:13);oneOamax(4,1:13)],[[x(3) x(3)];[y(1) y(2)]]);
+F4 = InterX([Vw(4,1:13);oneOamax(4,1:13)],[[x(4) x(4)];[y(1) y(2)]]);
+F = [F1 F2 F3 F4];
 
 % Find Increments for Different Intervals
 I = [F1(1)-F0(1), F2(1)-F1(1), F3(1)-F2(1), F4(1)-F3(1)]/10;
@@ -323,11 +336,7 @@ end
 newA = zeros(1, 40);
 for i = 1:4
     for j = (10*i-9):10*i
-        if (j==10*i && i~=1)
-            POINT = InterX([Vw(i+1,1:13);oneOamax(i+1,1:13)],[[newV(j) newV(j)];[y(1) y(2)]]);
-        else
-            POINT = InterX([Vw(i,1:13);oneOamax(i,1:13)],[[newV(j) newV(j)];[y(1) y(2)]]);
-        end
+        POINT = InterX([Vw(i,1:13);oneOamax(i,1:13)],[[newV(j) newV(j)];[y(1) y(2)]]);
         newA(j) = POINT(2);
     end
 end
@@ -336,7 +345,12 @@ end
 Time = zeros(1, 40);
 Time(2) = trapz([Vw(1,1) newV(1)],[oneOamax(1,1), newA(1)]);
 for i = 3:40
-    Time(i) = Time(i-1) + trapz([newV(i-2) newV(i-1)],[newA(i-2) newA(i-1)]);
+    if (i==22 || i==32)
+        index = (i - rem(i,10))/10;
+        Time(i) = Time(i-1) + trapz([newV(i-2) newV(i-1)],[F(2, index) newA(i-1)]);
+    else
+        Time(i) = Time(i-1) + trapz([newV(i-2) newV(i-1)],[newA(i-2) newA(i-1)]);
+    end
 end
 
 % Plot Graph of V vs T

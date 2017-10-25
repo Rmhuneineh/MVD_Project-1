@@ -322,7 +322,7 @@ F = [F1 F2 F3 F4];
 % Find Increments for Different Intervals
 I = [F1(1)-F0(1), F2(1)-F1(1), F3(1)-F2(1), F4(1)-F3(1)]/10;
 
-% Calculate New Velocity Vector
+% Calculate New Ideal Velocity Vector
 newV = zeros(1, 40);
 base = Vw(1,1);
 for i = 1:4
@@ -330,6 +330,28 @@ for i = 1:4
       newV(j) =  base + I(i)*(j-10*(i-1));
    end
    base = newV(j);
+end
+
+% Calculate New Actual Velocity Vector
+
+newVactual = zeros(1, 43);
+for i = 43:-1:35
+   newVactual(i) = newV(i-3);
+end
+newVactual(34) = newV(30);
+newVactual(33) = newV(30);
+for i = 32:-1:24
+   newVactual(i) = newV(i-2); 
+end
+newVactual(23) = newV(20);
+newVactual(22) = newV(20);
+for i=21:-1:13
+   newVactual(i) = newV(i-1); 
+end
+newVactual(12) = newV(10);
+newVactual(11) = newV(10);
+for i = 10:-1:1
+   newVactual(i) = newV(i);
 end
 
 % Calculate New 1/Acceleration Vector
@@ -341,7 +363,7 @@ for i = 1:4
     end
 end
 
-% Calculate Time Using Numerical Integration
+% Calculate Ideal Time Using Numerical Integration
 Time = zeros(1, 40);
 Time(2) = trapz([Vw(1,1) newV(1)],[oneOamax(1,1), newA(1)]);
 for i = 3:40
@@ -353,9 +375,32 @@ for i = 3:40
     end
 end
 
+% Calculate Actual Time Using Numerical Integration
+TimeActual = zeros(1,43);
+TimeActual(2) = trapz([Vw(1,1) newV(1)],[oneOamax(1,1), newA(1)]);
+for i = 3:11
+    TimeActual(i) = TimeActual(i-1) + trapz([newV(i-2) newV(i-1)],[newA(i-2) newA(i-1)]);
+end
+TimeActual(12) = TimeActual(11) + ts;
+for i = 13:22
+    TimeActual(i) = TimeActual(i-1) + trapz([newV(i-3) newV(i-2)],[newA(i-3) newA(i-2)]);
+end
+TimeActual(23) = TimeActual(22) + ts;
+TimeActual(24) = TimeActual(23) + trapz([newV(20) newV(21)],[F(2, 2) newA(21)]);
+for i = 25:33
+    TimeActual(i) = TimeActual(i-1) + trapz([newV(i-4) newV(i-3)],[newA(i-4) newA(i-3)]);
+end
+TimeActual(34) = TimeActual(33) + ts;
+TimeActual(35) = TimeActual(34) + trapz([newV(30) newV(31)],[F(2, 3) newA(31)]);
+for i = 36:43
+   TimeActual(i) = TimeActual(i-1) + trapz([newV(i-5) newV(i-4)],[newA(i-5) newA(i-4)]);
+end
+
 % Plot Graph of V vs T
 figure; hold on;
 plot(Time, newV);
+plot(TimeActual, newVactual);
+legend('Theretical Velocity', 'Actual Velocity');
 title('Velocity vs Time');
 xlabel('Time [s]');
 ylabel('Velocity [m/s]');

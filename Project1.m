@@ -414,7 +414,7 @@ ylabel('Velocity [m/s]');
 % FUEL CONSUMPTION
 
 % Define Constant(s)
-rof = 739; % Fuel Density [kg/m^3]
+rof = 739/1000; % Fuel Density [kg/m^3]
 Qm = .62/3600; % Volumetric Flow at idle [l/s];
 H = 4.4*10^7; % [J/Kg]
 
@@ -680,11 +680,11 @@ for i = 2:44
    q(i) = (coeff(kz, 1)*WeEce15(i) + coeff(kz, 2))/(1000*3600*745.7);
 end
 
-Q1i = zeros(1, 103);
+Q1i = zeros(1, 99);
 kz=1;
 ind = 1;
 for i = 1:109
-    if(TiEce15(i)~=TiEce15(i+1))
+    if(TiEce15(i)~=TiEce15(i+1) && ViEce15(i+1)>=ViEce15(i))
         if (ViEce15(i) > 0.1)
             for j = 1:44
                 if (ViEce15(i) == VEce15(j))
@@ -711,7 +711,7 @@ for i = 1:109
 end
 
  Qzeros1 = Qm*49;
- QiOne = 3*(sum(Q1i) + Qzeros1);
+ QiOne = 4*(sum(Q1i) + Qzeros1);
  
  
 PmeEudc = zeros(1,110);
@@ -741,11 +741,11 @@ for i = 2:110
    q2(i) = (coeff(kz, 1)*WeEudc(i) + coeff(kz, 2))/(1000*3600*745.7);
 end
 
-
+Q2i = zeros(1, 316);
 kz=1;
 ind = 1;
 for i = 1:326
-    if(TiEudc(i)~=TiEudc(i+1))
+    if(TiEudc(i)~=TiEudc(i+1) && ViEudc(i+1)>=ViEudc(i))
         if (ViEudc(i) > 0.1)
             for j = 1:110
                 if (ViEudc(i) == VEudc(j))
@@ -783,4 +783,4 @@ end
 Qzeros2 = Qm*40;
 QiTwo = sum(Q2i) + Qzeros2;
 
-Qtotal = 100*(QiOne + QiTwo);
+Qtotal = 100/11*(QiOne + QiTwo);

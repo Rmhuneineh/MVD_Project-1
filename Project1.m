@@ -304,8 +304,8 @@ amax(5,13) = 0;
 
 % Plot Maximum Acceleration
 oneOamax = 1./amax;
-figure; hold on;
 
+figure; hold on;
 for i = 1:5
    plot(Vw(i, 1:13), amax(i, 1:13));
 end
@@ -418,369 +418,153 @@ rof = 739/1000; % Fuel Density [kg/m^3]
 Qm = .62/3600; % Volumetric Flow at idle [l/s];
 H = 4.4*10^7; % [J/Kg]
 
-% Define Test Velocity and Time Vectors
-Vece15 = [0 0 4.17 4.17 0 0 8.89 8.89 0 0 13.89 13.89 8.89 8.89 0];
-Tece15 = [0 11 15 27 32 49 61 85 96 117 143 155 163 176 188];
+[NUM, ~, ~] = xlsread('NEDC', 'Foglio1');
+TimeNedc(1:15) = NUM(1:15, 1);
+TimeNedc(16:28) = NUM(61:73);
+VelocityNedc(1:15) = NUM(1:15, 2)/3.6;
+VelocityNedc(16:28) = NUM(61:73, 2)/3.6;
 
-Veudc = [0 0 19.44 19.44 13.89 13.89 19.44 19.44 27.78 27.78 33.33 33.33 0 0];
-Teudc = [0 20 61 111 119 188 201 251 286 316 336 346 380 400];
-
-% Find Equation of All Straight Lines
-
-CoeffEce15 = zeros(14, 2);
-
-for i = 2:14
-    CoeffEce15(i, 1:2) = polyfit(Tece15(i:i+1), Vece15(i:i+1), 1); 
+meanVelocity = zeros(1, 27);
+for i = 1:27
+    meanVelocity(i) = mean([VelocityNedc(i) VelocityNedc(i+1)]);
+    if(i<12)
+        j=i+15;
+        meanVelocity(j) = mean([VelocityNedc(j) VelocityNedc(j+1)]);
+    end
 end
 
-CoeffEudc = zeros(13, 2);
-for i = 2:13
-    CoeffEudc(i, 1:2) = polyfit(Teudc(i:i+1), Veudc(i:i+1), 1); 
+WeNedc = zeros(1, 27);
+for i = 1:27
+    if (meanVelocity(i) < 0.1)
+        WeNedc(i) = 1000;
+        
+    elseif (meanVelocity(i) > 0 && meanVelocity(i) < F1(1))
+        WeNedc(i) = meanVelocity(i)/Tgi(1)/Tf/Re*60/2/pi;
+        
+    elseif (meanVelocity(i) > F1(1) && meanVelocity(i) < F2(1))
+        WeNedc(i) = meanVelocity(i)/Tgi(2)/Tf/Re*60/2/pi;
+        
+    elseif (meanVelocity(i) > F2(1) && meanVelocity(i) < F3(1))
+        WeNedc(i) = meanVelocity(i)/Tgi(3)/Tf/Re*60/2/pi;
+        
+    elseif (meanVelocity(i) > F3(1) && meanVelocity(i) < Vw(4, 13))
+        WeNedc(i) = meanVelocity(i)/Tgi(4)/Tf/Re*60/2/pi;
+    else
+        WeNedc(i) = meanVelocity(i)/Tgi(5)/Tf/Re*60/2/pi;
+    end
 end
 
-% Find Instantaneous Velocity and Time at Each Second
+PeNedc = zeros (1, 27);
+for i = 1:27
+   for j = 1:12
+      if (WeNedc(i) >= werpm(j) && WeNedc(i) < werpm(j+1))
+          coeff = polyfit([werpm(j) werpm(j+1)], [Pe(j) Pe(j+1)], 1);
+          PeNedc(i) = coeff(1)*WeNedc(i) + coeff(2);
+      end
+   end
+end
 
-ViEce15 = zeros(1, 110);
-TiEce15 = zeros(1, 110);
-ind = 1;
+PmeNedc = zeros(1,27);
+for i = 1:27
+   PmeNedc(i) = 10*PeNedc(i)/Vcil/k/(WeNedc(i)/60);
+end
+
+[NUM, TXT, RAW] = xlsread('team14-lab1_1-lab1_2 v3', 'Team 14 engine map');
+Pme(1:22, 1:13) = NUM(2:23, 1:2:26);
+qGiven (1:22, 1:13) = NUM(2:23, 2:2:26)/1000/3600/745.7;
+q = zeros(1, 27);
+for i = 1:27
+   for j = 1:12
+      if(WeNedc(i) == werpm(j))
+        for k = 1:21
+            if(~isnan(Pme(k+1, j)) && PmeNedc(i)<Pme(k, j) && PmeNedc(i)>Pme(k+1, j))
+                coefficients1 = polyfit([Pme(k, j) Pme(k+1, j)], [qGiven(k, j) qGiven(k+1, j)], 1);
+                q(i) = coefficients1(1)*PmeNedc(i) + coefficients1(2);
+            end
+        end
+      elseif (WeNedc(i) > werpm(j) && WeNedc(i) < werpm(j+1))
+          flag = 1;
+          k=1;
+          while (flag==1 && k<22)
+            if(~isnan(Pme(k+1, j)) && PmeNedc(i)<Pme(k, j) && PmeNedc(i)>Pme(k+1, j))
+                coefficients1 = polyfit([Pme(k, j) Pme(k+1, j)], [qGiven(k, j) qGiven(k+1, j)], 1);
+                q1 = coefficients1(1)*PmeNedc(i) + coefficients1(2);
+                flag = 0;
+            end
+            k=k+1;
+          end
+          
+          if (flag == 1)
+             coefficents1 =  polyfit([Pme(1, j) Pme(2, j)], [qGiven(1, j) qGiven(2, j)], 1);
+             q1 = coefficients1(1)*PmeNedc(i) + coefficients1(2);
+          end
+          
+          flag = 1;
+          k=1;
+          while (flag==1 && k<22)
+            if(~isnan(Pme(k+1, j+1)) && PmeNedc(i)<Pme(k, j+1) && PmeNedc(i)>Pme(k+1, j+1))
+                coefficients1 = polyfit([Pme(k, j+1) Pme(k+1, j+1)], [qGiven(k, j+1) qGiven(k+1, j+1)], 1);
+                q2 = coefficients1(1)*PmeNedc(i) + coefficients1(2);
+                flag = 0;
+            end
+            k=k+1;
+          end
+          
+          if (flag == 1)
+             coefficents1 =  polyfit([Pme(1, j+1) Pme(2, j+1)], [qGiven(1, j+1) qGiven(2, j+1)], 1);
+             q2 = coefficients1(1)*PmeNedc(i) + coefficients1(2);
+          end
+          
+          coefficients1 = polyfit([werpm(j) werpm(j+1)], [q1 q2], 1);
+          q(i) = coefficients1(1)*WeNedc(i) + coefficients1(2);
+      end
+   end
+end
+
+quarterFuelConsumption = zeros(1, 14);
+q1Fourth = zeros(1, 7);
+index = 1;
 for i = 1:14
-    if(Vece15(i+1) >= Vece15(i) && Vece15(i+1) ~=0)
-        for j = Tece15(i):Tece15(i+1)
-            ViEce15(ind) = CoeffEce15(i,1)*j + CoeffEce15(i,2);
-            TiEce15(ind) = j;
-            ind = ind+1;
-        end
-    end 
-end
-
-ViEudc = zeros(1, 327);
-TiEudc = zeros(1, 327);
-ind = 1;
-for i = 1:13
-   if (Veudc(i+1) >= Veudc(i) && Veudc(i+1) ~= 0)
-      for j = Teudc(i):Teudc(i+1)
-         ViEudc(ind) = CoeffEudc(i,1)*j + CoeffEudc(i,2);
-         TiEudc(ind) = j;
-         ind = ind + 1;
-      end
-   end
-end
-
-Vmi = zeros(1, 109);
-for i = 1:109
-   Vmi(i) = mean([ViEce15(i) ViEce15(i+1)]);
-end
-
-VmiE = zeros(1, 326);
-for i = 1:326
-   VmiE(i) = mean([ViEudc(i) ViEudc(i+1)]);
-end
-
-flags = zeros(1, 110);
-ind = 1;
-
-for i = 1:110
-    flag = 0;
-    
-   for j = 1:110
-       if(ViEce15(j) == ViEce15(i) && flags(i) == 1)
-           flag = 1;
-       end
-   end
-   
-   if (flag == 0)
-       VaEce15(ind) = ViEce15(i);
-       for kz = i:110
-          if (ViEce15(kz) == ViEce15(i))
-              flags(kz) = 1;
-          end
-       end
-       ind = ind + 1;
-   end
-end
-
-flagsE = zeros(1, 327);
-ind = 1;
-
-for i = 1:327
-    flag = 0;
-    
-   for j = 1:327
-       if(ViEudc(j) == ViEudc(i) && flagsE(i) == 1)
-           flag = 1;
-       end
-   end
-   
-   if (flag == 0)
-       VaEudc(ind) = ViEudc(i);
-       ind = ind + 1;
-       for kz = 1:327
-          if (ViEudc(kz) == ViEudc(i))
-              flagsE(kz) = 1;
-          end
-       end
-   end
-end
-
-for i = 1:51
-    if (i<6)
-       VEce15(i) = VaEce15(i);
-    elseif (i>8 && i<21)
-        VEce15(i-3) = VaEce15(i);
-    elseif (i>21 && i<48)
-        VEce15(i-4) = VaEce15(i);
-    elseif (i>50)
-        VEce15(44) = VaEce15(i);
-    end
-end
-
-for i = 1:117
-   if(i<43)
-       VEudc(i) = VaEudc(i);
-   elseif (i==45)
-       VEudc(i-2) = VaEudc(i);
-   elseif (i>47 && i<60)
-       VEudc(i-4) = VaEudc(i);
-   elseif (i>60 && i<96)
-       VEudc(i-5) = VaEudc(i);
-   elseif(i>96 && i<117)
-      VEudc(i-6) = VaEudc(i); 
-   end
-end
-
-WeiEce15 = zeros(1, 110);
-for i = 1:110
-    if (ViEce15(i) < 0.1)
-        WeiEce15(i) = 1000;
-        
-    elseif (ViEce15(i) > 0 && ViEce15(i) < F1(1))
-        WeiEce15(i) = ViEce15(i)/Tgi(1)/Tf/Re*60/2/pi;
-        
-    elseif (ViEce15(i) > F1(1) && ViEce15(i) < F2(1))
-        WeiEce15(i) = ViEce15(i)/Tgi(2)/Tf/Re*60/2/pi;
-    end
-end
-
-WeEce15 = zeros(1, 44);
-for i = 1:44
-    if (VEce15(i) < 0.1)
-        WeEce15(i) = 1000;
-        
-    elseif (VEce15(i) > 0 && VEce15(i) < F1(1))
-        WeEce15(i) = VEce15(i)/Tgi(1)/Tf/Re*60/2/pi;
-        
-    elseif (VEce15(i) > F1(1) && VEce15(i) < F2(1))
-        WeEce15(i) = VEce15(i)/Tgi(2)/Tf/Re*60/2/pi;
-    end
-end
-
-WeiEudc = zeros(1, 327);
-for i = 1:327
-    if (ViEudc(i) < 0.1)
-        WeiEudc(i) = 1000;
-        
-    elseif (ViEudc(i) > 0.1 && ViEudc(i) < F1(1))
-        WeiEudc(i) = ViEudc(i)/Tgi(1)/Tf/Re*60/2/pi;
-        
-    elseif (ViEudc(i) > F1(1) && ViEudc(i) < F2(1))
-        WeiEudc(i) = ViEudc(i)/Tgi(2)/Tf/Re*60/2/pi;
-    
-    elseif (ViEudc(i) > F2(1) && ViEudc(i) < F3(1))
-        WeiEudc(i) = ViEudc(i)/Tgi(3)/Tf/Re*60/2/pi;
-        
-    elseif (ViEudc(i) > F3(1) && ViEudc(i) < Vw(4, 13))
-        WeiEudc(i) = ViEudc(i)/Tgi(4)/Tf/Re*60/2/pi;
-    else
-        WeiEudc(i) = ViEudc(i)/Tgi(5)/Tf/Re*60/2/pi;
-    end
-end
-
-WeEudc = zeros(1, 110);
-for i = 1:110
-    if (VEudc(i) < 0.1)
-        WeEudc(i) = 1000;
-        
-    elseif (VEudc(i) > 0.1 && VEudc(i) < F1(1))
-        WeEudc(i) = VEudc(i)/Tgi(1)/Tf/Re*60/2/pi;
-        
-    elseif (VEudc(i) > F1(1) && VEudc(i) < F2(1))
-        WeEudc(i) = VEudc(i)/Tgi(2)/Tf/Re*60/2/pi;
-    
-    elseif (VEudc(i) > F2(1) && VEudc(i) < F3(1))
-        WeEudc(i) = VEudc(i)/Tgi(3)/Tf/Re*60/2/pi;
-        
-    elseif (VEudc(i) > F3(1) && VEudc(i) < Vw(4, 13))
-        WeEudc(i) = VEudc(i)/Tgi(4)/Tf/Re*60/2/pi;
-    else
-        WeEudc(i) = VEudc(i)/Tgi(5)/Tf/Re*60/2/pi;
-    end
-end
-
-PeEce15 = zeros (1, 44);
-for i = 1:44
-   for j = 1:12
-      if (WeEce15(i) > werpm(j) && WeEce15(i) < werpm(j+1))
-          coeff = polyfit([werpm(j) werpm(j+1)], [Pe(j) Pe(j+1)], 1);
-          PeEce15(i) = coeff(1)*WeEce15(i) + coeff(2);
-          
-      else
-          coeff = polyfit([0 werpm(1)], [0 Pe(1)], 1);
-          PeEce15(i) = coeff(1)*WeEce15(i) + coeff(2);
-      end
-   end
-end
-
-PeEudc = zeros (1, 110);
-for i = 1:110
-   for j = 1:12
-      if (WeEudc(i) > werpm(j) && WeEudc(i) < werpm(j+1))
-          coeff = polyfit([werpm(j) werpm(j+1)], [Pe(j) Pe(j+1)], 1);
-          PeEudc(i) = coeff(1)*WeEudc(i) + coeff(2);
-          
-      else
-          coeff = polyfit([0 werpm(1)], [0 Pe(1)], 1);
-          PeEudc(i) = coeff(1)*WeEudc(i) + coeff(2);
-      end
-   end
-end
-
-PmeEce15 = zeros(1,44);
-for i = 1:44
-   PmeEce15(i) = 10*PeEce15(i)/Vcil/k/(WeEce15(i)/60);
-end
-
-coeff(1,1:2) = polyfit([0 werpm(1)], [1/H, 220.11], 1);
-coeff(2,1:2) = polyfit([werpm(1) werpm(2)], [220.11 205.94], 1);
-coeff(3, 1:2) = polyfit([werpm(2) werpm(3)], [205.94 205.61], 1);
-coeff(4,1:2) = polyfit([werpm(3) werpm(4)], [205.61 201.58], 1);
-coeff(5,1:2) = polyfit([werpm(4) werpm(5)], [201.58 204.2], 1);
-coeff(6, 1:2) = polyfit([werpm(5) werpm(6)], [204.2 206.08], 1);
-coeff(7, 1:2) = polyfit([werpm(6) werpm(7)], [206.08 207.39], 1);
-coeff(8, 1:2) = polyfit([werpm(7) werpm(8)], [207.39 211.16], 1);
-coeff(9, 1:2) = polyfit([werpm(8) werpm(9)], [211.16 212.22], 1);
-coeff(10, 1:2) = polyfit([werpm(9) werpm(10)], [212.22 216.16], 1);
-coeff(11, 1:2) = polyfit([werpm(10) werpm(11)], [216.16 222.5], 1);
-coeff(12, 1:2) = polyfit([werpm(11) werpm(12)], [222.5 235], 1);
-coeff(13, 1:2) = polyfit([werpm(12) werpm(13)], [221.89 286.06], 1);
-
-q = zeros(1, 44);
-q(1) = 220.11/(1000*3600*745.7);
-kz = 1;
-for i = 2:44
-    if (WeEce15(i)<1000)
-            kz = 1;
-            
-    else
-        for j = 1:12
-            if(WeEce15(i)>werpm(j) && WeEce15(i)<werpm(j+1))
-                kz = j;
-            end
-        end
-    end
-   q(i) = (coeff(kz, 1)*WeEce15(i) + coeff(kz, 2))/(1000*3600*745.7);
-end
-
-Q1i = zeros(1, 99);
-kz=1;
-ind = 1;
-for i = 1:109
-    if(TiEce15(i)~=TiEce15(i+1) && ViEce15(i+1)>=ViEce15(i))
-        if (ViEce15(i) > 0.1)
-            for j = 1:44
-                if (ViEce15(i) == VEce15(j))
-                    kz = j;
-                end
-            end
-            
+    if(VelocityNedc(i)<=VelocityNedc(i+1))
+        if (meanVelocity(i)<F1(1))
+            equivalentMass = me(1);
+        elseif (meanVelocity(i)>F1(1) && meanVelocity(i)<F2(1))
+            equivalentMass = me(2);
+        elseif (meanVelocity(i)>F2(1) && meanVelocity(i)<F3(1))
+            equivalentMass = me(3);
+        elseif (meanVelocity(i)>F3(1) && meanVelocity(i)<Vw(4,13))
+            equivalentMass = me(4);
         else
-            for j = 1:44
-                if (ViEce15(i+1) == VEce15(j))
-                    kz = j;
-                end
-            end
+            equivalentMass = me(5);
         end
-        
-        if (ViEce15(i) < F1(1))
-            Q1i(ind) = ((A(1)*Vmi(i)+B(1)*Vmi(i)^3) + me(1)*Vmi(i)*((ViEce15(i+1)-ViEce15(i))))*q(kz)/rof/Tf;
-            ind = ind + 1;
-        else
-            Q1i(ind) = ((A(1)*Vmi(i)+B(1)*Vmi(i)^3) + me(2)*Vmi(i)*((ViEce15(i+1)-ViEce15(i))))*q(kz)/rof/Tf;
-            ind = ind + 1;
+        quarterFuelConsumption(i) =  ((A(1)*meanVelocity(i)+B(1)*meanVelocity(i)^3) + equivalentMass*meanVelocity(i)*((VelocityNedc(i+1)-VelocityNedc(i)))/(TimeNedc(i+1)-TimeNedc(i)))*(TimeNedc(i+1)-TimeNedc(i))*q(i)/rof/Tf;
+        if(quarterFuelConsumption(i) ~=0)
+            q1Fourth(index) = quarterFuelConsumption(i);
+            index = index+1;
         end
     end
 end
 
- Qzeros1 = Qm*49;
- QiOne = 4*(sum(Q1i) + Qzeros1);
- 
- 
-PmeEudc = zeros(1,110);
-for i = 1:110
-   PmeEudc(i) = 10*PeEudc(i)/Vcil/k/(WeEudc(i)/60);
-end
-
-coeff(14, 1:2) = polyfit([werpm(12) werpm(13)], [225.65 286.06], 1);
-
-q2 = zeros(1, 110);
-q2(1) = 220.11/(1000*3600*745.7);
-
-kz=1;
-for i = 2:110
-    if (WeEudc(i)<1000)
-        kz=1;
-    else
-        for j = 1:12
-           if(WeEudc(i)>werpm(j) && WeEudc(i)<werpm(j+1))
-              kz = j; 
-           end
-        end
-        if(kz==13 && PmeEudc(i)<7.2)
-           kz=14; 
-        end
-    end
-   q2(i) = (coeff(kz, 1)*WeEudc(i) + coeff(kz, 2))/(1000*3600*745.7);
-end
-
-Q2i = zeros(1, 316);
-kz=1;
-ind = 1;
-for i = 1:326
-    if(TiEudc(i)~=TiEudc(i+1) && ViEudc(i+1)>=ViEudc(i))
-        if (ViEudc(i) > 0.1)
-            for j = 1:110
-                if (ViEudc(i) == VEudc(j))
-                    kz = j;
-                end
-            end
-            
+q2 = zeros(1, 13);
+index = 1;
+for i = 16:26
+    if(VelocityNedc(i)<=VelocityNedc(i+1))
+        if (meanVelocity(i)<F1(1))
+            equivalentMass = me(1);
+        elseif (meanVelocity(i)>F1(1) && meanVelocity(i)<F2(1))
+            equivalentMass = me(2);
+        elseif (meanVelocity(i)>F2(1) && meanVelocity(i)<F3(1))
+            equivalentMass = me(3);
+        elseif (meanVelocity(i)>F3(1) && meanVelocity(i)<Vw(4,13))
+            equivalentMass = me(4);
         else
-            for j = 1:110
-                if (ViEudc(i+1) == VEudc(j))
-                    kz = j;
-                end
-            end
+            equivalentMass = me(5);
         end
-        
-        if (ViEudc(i)<F1(1))
-            Q2i(ind) = ((A(1)*VmiE(i)+B(1)*VmiE(i)^3) + me(1)*VmiE(i)*(ViEudc(i+1)-ViEudc(i)))*q2(kz)/rof/Tf;
-            ind = ind + 1;
-        elseif (ViEudc(i)>F1(1) && ViEudc(i)<F2(1))
-            Q2i(ind) = ((A(1)*VmiE(i)+B(1)*VmiE(i)^3) + me(2)*VmiE(i)*(ViEudc(i+1)-ViEudc(i)))*q2(kz)/rof/Tf;
-            ind = ind + 1;
-        elseif (ViEudc(i)>F2(1) && ViEudc(i)<F3(1))
-            Q2i(ind) = ((A(1)*VmiE(i)+B(1)*VmiE(i)^3) + me(3)*VmiE(i)*(ViEudc(i+1)-ViEudc(i)))*q2(kz)/rof/Tf;
-            ind = ind + 1;
-        elseif (ViEudc(i)>F3(1) && ViEudc(i)<Vw(4,13))
-            Q2i(ind) = ((A(1)*VmiE(i)+B(1)*VmiE(i)^3) + me(4)*VmiE(i)*(ViEudc(i+1)-ViEudc(i)))*q2(kz)/rof/Tf;
-            ind = ind + 1;
-        else
-            Q2i(ind) = ((A(1)*VmiE(i)+B(1)*VmiE(i)^3) + me(5)*VmiE(i)*(ViEudc(i+1)-ViEudc(i)))*q2(kz)/rof/Tf;
-            ind = ind + 1;
-        end
+        q2(index) =  ((A(1)*meanVelocity(i)+B(1)*meanVelocity(i)^3) + equivalentMass*meanVelocity(i)*((VelocityNedc(i+1)-VelocityNedc(i)))/(TimeNedc(i+1)-TimeNedc(i)))*(TimeNedc(i+1)-TimeNedc(i))*q(i)/rof/Tf;
+        index = index+1;
     end
 end
 
-Qzeros2 = Qm*40;
-QiTwo = sum(Q2i) + Qzeros2;
-
-Qtotal = 100/11*(QiOne + QiTwo);
+q1Total = 4*sum(q1Fourth);
+qzeros = Qm*(291.6);
+Qtotal = 100/11*(q1Total + sum(q2) + qzeros);

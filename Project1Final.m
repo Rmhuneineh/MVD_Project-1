@@ -1,33 +1,33 @@
 clear all
 clc
 
-% Define Given Constants
-Cx = .35; %[-]
-S = 1.82; %[m^2]
-m = 970; %[kg]
-Vcil = 1040; %[cm^3]
-Tf = .281; %[-]
-wmin = 850; %[rpm]
-efficiencyt = .9; %[-]
-l = 2.3; %[m]
-a = 1.15; %[m]
-b=l-a;
-hG = .5; %[m]
-wheel_indication = '155/65R13';
-R0 = 13*25.4/2 + .65*155; %[mm]
-Re = .98*R0*10^-3; % [m]
-N = 5; %[-]
-ts = 1; %[s]
-Je = .08; %[kg.m^2]
-Jw = 1.6; %[kg.m^2]
-Jt = Jw; %[kg.m^2]
-g = 9.81; % [m/s^2]
-ro = 1.3; %[kg/m^2]
-alpha = atan(0:0.1:0.4); %[-]
-f0 = .013; %[-]
-K = 6.51*10^-6; %[s^2/m^2] 
+%% Define Given Constants
+Cx = .35; %[-] Aerodynamic Drag Coefficient
+S = 1.82; %[m^2] Frontal Surface Area
+m = 970; %[kg] Vehicle's Mass
+Vcil = 1040; %[cm^3] Volume of Cylinder
+Tf = .281; %[-] Differentail Transmission Ratio
+wmin = 850; %[rpm] Minimum Engine Rotaional Speed
+efficiencyt = .9; %[-] Efficiency of Powertrain
+l = 2.3; %[m] Wheel Base
+a = 1.15; %[m] Horizontal Distance From Center of Gravity -> Front Wheel
+b=l-a; % [m] Horizontal Distance From Center of Gravity -> Rear Wheel
+hG = .5; %[m] Height of Center of Gravity
+wheel_indication = '155/65R13'; % Wheel Incdication
+R0 = 13*25.4/2 + .65*155; %[mm] % Wheel Radius
+Re = .98*R0*10^-3; % [m] % Wheel Effective Radius
+N = 5; %[-] % Number of Gears
+ts = 1; %[s] % Time of Shifting Between Gears
+Je = .08; %[kg.m^2] Engine's Moment of Inertia
+Jw = 1.6; %[kg.m^2] Wheels' Moment of Inertia
+Jt = Jw; %[kg.m^2] Transmission's Moment of Inertia
+g = 9.81; % [m/s^2] Gravitational Constant
+ro = 1.3; %[kg/m^2] Air Density
+alpha = atan(0:0.1:0.4); %[-] Angle of Inclination
+f0 = .013; %[-] Rolling Resistance Coefficient 1
+K = 6.51*10^-6; %[s^2/m^2] Rolling Resistance Coefficient 2
 
-% POWER NEEDED FOR MOTION
+%% POWER NEEDED FOR MOTION
 
 % Take Artbitrary Velocity Interval
 vKm = 0:10:300; %[km/h]
@@ -65,7 +65,7 @@ for i = 1:5
     
 end
 
-%Plot The Required Graphs In Part I
+% Plot The Required Graphs In Part I
 
 figure; hold on;
 
@@ -98,7 +98,7 @@ for i = 1:5
     grid on;
 end
 
-% COMPUTATION OF THE MAXIMUM POWER AVAILABLE AT THE WHEELS
+%% COMPUTATION OF THE MAXIMUM POWER AVAILABLE AT THE WHEELS
 
 % Define RPM and MEP As Given In Engine Map
 werpm = [1000, 1500, 2000, 2500, 3000, 3250, 3500, 4000, 4500, 5000, 5500, 6000, 6500]; %[rpm]
@@ -134,7 +134,7 @@ ylabel('Me [Nm]');
 title('Torque vs RPM');
 grid on;
 
-% Obtain Maximum Power And Corresponding We
+%% Obtain Maximum Power And Corresponding We
 [Pmax, imax] = max(Pe); % [W]
 wemax = we(imax); % [rad/s]
 
@@ -164,7 +164,7 @@ ylabel('Pe [W]');
 title('Approximated Power vs RPM');
 grid on;
 
-% Calculate The Power Available At The Wheels
+%% Calculate The Power Available At The Wheels
 Pa = zeros(13, 1);
 Paapp = zeros(13, 1);
 for i = 1:13
@@ -181,7 +181,7 @@ ylabel('Pa [W]');
 title('Power Available at the Wheels vs RPM');
 grid on;
 
-% GRADEABILITY AND INITIAL CHOICE OF THE TRANSMISSION RATIOS
+%% GRADEABILITY AND INITIAL CHOICE OF THE TRANSMISSION RATIOS
 
 % Calculate Maximum Speed Vehicle Can Reach
 Pamax = max(Pa);
@@ -247,11 +247,11 @@ title('Power Available & Power Needed (null and max slope) @ Different Gear Rati
 
 grid on;
 
-% MAXIMUM POWER THAT CAN BE TRANSFERRED BY THE TIRES TO THE GROUND
+%% MAXIMUM POWER THAT CAN BE TRANSFERRED BY THE TIRES TO THE GROUND
 
 % Define Constants
-c1 = [1.1, .8];
-c2 = [6, 8]*10^-3;
+c1 = [1.1, .8]; % Dry Road Coefficients
+c2 = [6, 8]*10^-3; % Wet Road Coefficients
 
 % Calculate Dx
 Rl = 0.92*R0*10^-3;
@@ -283,7 +283,7 @@ interW = InterX([vm;PmaxWG(2, 1:31)],[vm;Pn]);
 VmaxWG(1,1) = interD(1,2);
 VmaxWG(1,2) = interW(1,2);
 
-% ACCELERATION PERFORMANCE
+%% ACCELERATION PERFORMANCE
 
 % Compute Equivalent Mass
 me = m + Jt/(Re*Tf)^2 + Je/(Re*Tf)^2./Tgi.^2;
@@ -411,7 +411,7 @@ title('Velocity vs Time');
 xlabel('Time [s]');
 ylabel('Velocity [m/s]');
 
-% FUEL CONSUMPTION
+%% FUEL CONSUMPTION
 
 % Define Constant(s)
 rof = 739; % Fuel Density [kg/m^3]
